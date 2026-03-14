@@ -93,7 +93,26 @@ gcloud builds submit --config cloudbuild.yaml
 
 Visit the Cloud Run URL. Click **Start Session**, share your screen, allow mic.
 
-### Run locally (full features)
+### Try it online (full features with local helpers)
+
+To use code watcher and click agent with the hosted app:
+
+```bash
+# 1. Open the app in your browser
+# Visit: https://codewhisper-xxxxx.run.app (replace with your Cloud Run URL)
+
+# 2. Connect your project files (new terminal)
+pip install watchdog websockets
+python code_watcher.py /path/to/your/project --backend-url wss://codewhisper-xxxxx.run.app/ws/extension
+
+# 3. Enable IDE navigation (new terminal, optional)
+pip install pyautogui websockets
+python click_agent.py --backend-url wss://codewhisper-xxxxx.run.app/ws/click-agent
+
+# 4. Click Start Session in the browser, share your full screen, allow mic
+```
+
+### Run fully local
 
 **Prerequisites:** Docker, Python 3.9+, a [Gemini API key](https://aistudio.google.com/apikey) (free).
 
@@ -112,7 +131,7 @@ pip install watchdog websockets
 python code_watcher.py /path/to/your/project
 
 # 4. (Optional) Start click agent for IDE navigation
-pip install pyautogui flask pillow
+pip install pyautogui websockets
 python click_agent.py
 
 # 5. Open http://localhost:3000

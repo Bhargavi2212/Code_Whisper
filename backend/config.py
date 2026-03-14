@@ -23,8 +23,7 @@ class Settings(BaseSettings):
     gemini_api_key: str = ""
     gemini_model: str = "gemini-2.5-flash-native-audio-preview-12-2025"
 
-    # External services
-    click_agent_url: str = "http://localhost:8001"
+    # External services (click agent connects via WebSocket; no URL needed)
     extension_ws_path: str = "/ws/extension"
 
     # Audio

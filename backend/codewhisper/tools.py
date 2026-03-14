@@ -12,7 +12,7 @@ from utils.coordinates import map_coordinates
 # Session-scoped context set by main.py when session starts (screen_width, screen_height).
 _session_context: dict[str, Any] = {"screen_width": 1920, "screen_height": 1080}
 
-# Shared click client instance (uses settings.click_agent_url).
+# Shared click client instance (routes via click_agent_bridge WebSocket).
 _click_client = ClickClient()
 
 

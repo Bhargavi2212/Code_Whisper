@@ -1,76 +1,45 @@
-"""HTTP client for the CodeWhisper click agent (runs on host)."""
+"""Client for the CodeWhisper click agent. Routes through click_agent_bridge (WebSocket)."""
 
 import logging
 
-import httpx
-
-from config import settings
+from services.click_agent_bridge import click_agent_bridge
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_TIMEOUT = 5.0
-
 
 class ClickClient:
-    """Async HTTP client for the click agent. All methods catch errors and return False on failure."""
-
-    def __init__(self, base_url: str | None = None) -> None:
-        self._base = (base_url or settings.click_agent_url).rstrip("/")
-        self._timeout = DEFAULT_TIMEOUT
+    """Async client for the click agent via WebSocket bridge. All methods return False on failure."""
 
     async def check_available(self) -> bool:
-        """GET /health. Return True if status 200 and body has status ok."""
-        try:
-            async with httpx.AsyncClient(timeout=self._timeout) as client:
-                response = await client.get(f"{self._base}/health")
-                if response.status_code != 200:
-                    return False
-                data = response.json()
-                return data.get("status") == "ok"
-        except Exception as e:
-            logger.warning("Click agent check failed: %s", e)
-            return False
+        """Return True if click agent WebSocket is connected."""
+        return click_agent_bridge.is_connected
 
     async def click(self, x: int, y: int, double: bool = False) -> bool:
-        """POST /click or /double_click. Return True on success."""
-        path = "/double_click" if double else "/click"
-        try:
-            async with httpx.AsyncClient(timeout=self._timeout) as client:
-                response = await client.post(f"{self._base}{path}", json={"x": x, "y": y})
-                return response.status_code == 200
-        except Exception as e:
-            logger.warning("Click agent %s failed: %s", path, e)
+        """Click or double-click at (x, y). Return True on success."""
+        if not click_agent_bridge.is_connected:
             return False
+        action = "double_click" if double else "click"
+        result = await click_agent_bridge.send_command(action, {"x": x, "y": y})
+        status = (result or {}).get("status", "")
+        return "clicked" in status or "double_clicked" in status
 
     async def scroll(self, x: int, y: int, amount: int) -> bool:
-        """POST /scroll with x, y, clicks. Return True on success."""
-        try:
-            async with httpx.AsyncClient(timeout=self._timeout) as client:
-                response = await client.post(
-                    f"{self._base}/scroll",
-                    json={"x": x, "y": y, "clicks": amount},
-                )
-                return response.status_code == 200
-        except Exception as e:
-            logger.warning("Click agent scroll failed: %s", e)
+        """Scroll at (x, y) by amount. Return True on success."""
+        if not click_agent_bridge.is_connected:
             return False
+        result = await click_agent_bridge.send_command("scroll", {"x": x, "y": y, "clicks": amount})
+        return "scrolled" in (result or {}).get("status", "")
 
     async def hotkey(self, keys: list[str]) -> bool:
-        """POST /hotkey. Return True on success."""
-        try:
-            async with httpx.AsyncClient(timeout=self._timeout) as client:
-                response = await client.post(f"{self._base}/hotkey", json={"keys": keys})
-                return response.status_code == 200
-        except Exception as e:
-            logger.warning("Click agent hotkey failed: %s", e)
+        """Press hotkey. Return True on success."""
+        if not click_agent_bridge.is_connected:
             return False
+        result = await click_agent_bridge.send_command("hotkey", {"keys": keys})
+        return "pressed" in (result or {}).get("status", "")
 
     async def type_text(self, text: str) -> bool:
-        """POST /type_text. Return True on success."""
-        try:
-            async with httpx.AsyncClient(timeout=self._timeout) as client:
-                response = await client.post(f"{self._base}/type_text", json={"text": text})
-                return response.status_code == 200
-        except Exception as e:
-            logger.warning("Click agent type_text failed: %s", e)
+        """Type text. Return True on success."""
+        if not click_agent_bridge.is_connected:
             return False
+        result = await click_agent_bridge.send_command("type_text", {"text": text})
+        return "typed" in (result or {}).get("status", "")

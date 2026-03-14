@@ -14,6 +14,7 @@ from config import settings
 from codewhisper import root_agent
 from codewhisper.tools import set_session_context
 from services.extension_bridge import extension_bridge
+from services.click_agent_bridge import click_agent_bridge
 from audio_handler import encode_audio_for_client, validate_audio_chunk
 from frame_handler import validate_frame, resize_frame
 
@@ -71,19 +72,12 @@ app.add_middleware(
 @app.get("/health")
 async def health_check() -> dict:
     """Health check endpoint. Optionally include extension/click status."""
-    from services.click_client import ClickClient
-    click_available = False
-    try:
-        client = ClickClient()
-        click_available = await client.check_available()
-    except Exception:
-        pass
     return {
         "status": "healthy",
         "service": "codewhisper-backend",
         "agent_model": settings.agent_model,
         "extension_connected": extension_bridge.is_connected,
-        "click_agent_available": click_available,
+        "click_agent_available": click_agent_bridge.is_connected,
     }
 
 
@@ -101,6 +95,22 @@ async def websocket_extension(websocket: WebSocket) -> None:
         pass
     finally:
         extension_bridge.clear_connection()
+
+
+@app.websocket("/ws/click-agent")
+async def websocket_click_agent(websocket: WebSocket) -> None:
+    """WebSocket for the click agent. Register with click_agent_bridge on connect."""
+    await websocket.accept()
+    click_agent_bridge.set_connection(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            msg = json.loads(data)
+            click_agent_bridge.handle_message(msg)
+    except WebSocketDisconnect:
+        pass
+    finally:
+        click_agent_bridge.clear_connection()
 
 
 def _build_run_config() -> RunConfig:
