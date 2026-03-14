@@ -73,6 +73,19 @@ The live version uses voice + screen share. For the full experience with direct 
 
 ---
 
+## Deploy to Cloud Run
+
+**One-off deploy (from your machine):**
+
+```bash
+gcloud builds submit --config cloudbuild.yaml
+```
+
+**Deploy on every push to `main`:**  
+Connect the repo to Cloud Build and create a trigger so each push runs `cloudbuild.yaml`. See [docs/cloud-build-trigger-setup.md](docs/cloud-build-trigger-setup.md).
+
+---
+
 ## Quick Start
 
 ### Try it online (no setup)
