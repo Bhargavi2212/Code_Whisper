@@ -1,5 +1,6 @@
 # Deploy to Google Cloud Run on push to main
-# Requires GitHub secrets: GCP_PROJECT_ID, GCP_SA_KEY (service account JSON key)
+# Requires GitHub secrets: GCP_PROJECT_ID, GCP_SA_KEY (full contents of service account JSON key)
+# Must run from the main repo (not a fork) so secrets are available.
 
 name: Deploy to Cloud Run
 
@@ -17,6 +18,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Check required secrets
+        run: |
+          if [ -z "${{ secrets.GCP_PROJECT_ID }}" ]; then
+            echo "::error::GCP_PROJECT_ID secret is not set. Add it in repo Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+          if [ -z "${{ secrets.GCP_SA_KEY }}" ]; then
+            echo "::error::GCP_SA_KEY secret is not set. Paste the full JSON key in Settings → Secrets and variables → Actions. If this run is from a fork, push from the main repo instead."
+            exit 1
+          fi
+          echo "Secrets present."
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
