@@ -1,6 +1,7 @@
 # Environment
 .env
 .venv/
+github-actions-key.json
 venv/
 env/
 

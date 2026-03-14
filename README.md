@@ -82,7 +82,8 @@ gcloud builds submit --config cloudbuild.yaml
 ```
 
 **Deploy on every push to `main`:**  
-Connect the repo to Cloud Build and create a trigger so each push runs `cloudbuild.yaml`. See [docs/cloud-build-trigger-setup.md](docs/cloud-build-trigger-setup.md).
+- **GitHub Actions** (recommended): Add secrets `GCP_PROJECT_ID` and `GCP_SA_KEY`; each push runs [.github/workflows/deploy-cloudrun.yml](.github/workflows/deploy-cloudrun.yml). See [docs/github-actions-deploy.md](docs/github-actions-deploy.md).  
+- **Cloud Build trigger:** Alternatively connect the repo in GCP and create a trigger — [docs/cloud-build-trigger-setup.md](docs/cloud-build-trigger-setup.md).
 
 ---
 
