@@ -53,15 +53,15 @@ function SessionControls({
             <p>Code watcher: {extensionConnected ? 'Connected' : 'Not connected'}</p>
             <p>Click agent: {clickAgentAvailable ? 'Connected' : 'Not connected'}</p>
             {showConnectionHelp && (
-              <div className="mt-2 pt-2 border-t border-gray-200 space-y-1">
-                <p className="font-medium text-gray-600">To enable file access and navigation, run in a terminal:</p>
+              <div className="mt-2 pt-2 border-t border-gray-200 space-y-2">
+                <p className="font-medium text-gray-600">To enable file access and navigation, run each command in a separate terminal (from the CodeWhisper folder):</p>
                 {!extensionConnected && (
-                  <code className="block bg-white px-2 py-1 rounded border border-gray-200 text-[11px] break-all">
-                    python code_watcher.py /path/to/project --backend-url {wsBaseUrl}/ws/extension
+                  <code className="block bg-white px-2 py-1.5 rounded border border-gray-200 text-[11px] break-all font-mono">
+                    python code_watcher.py &lt;your-project-path&gt; --backend-url {wsBaseUrl}/ws/extension
                   </code>
                 )}
                 {!clickAgentAvailable && (
-                  <code className="block bg-white px-2 py-1 rounded border border-gray-200 text-[11px] break-all">
+                  <code className="block bg-white px-2 py-1.5 rounded border border-gray-200 text-[11px] break-all font-mono">
                     python click_agent.py --backend-url {wsBaseUrl}/ws/click-agent
                   </code>
                 )}
